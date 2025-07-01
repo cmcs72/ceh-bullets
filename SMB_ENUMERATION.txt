@@ -1,0 +1,33 @@
+[SMB ENUMERATION]
+
+SMB 
+smbclient -L <IP>
+
+(login anonymous)
+smbclient -N \\\\<IP>\\<share>
+
+enum4linux
+
+#NBT discovery
+nbtscan -r 192.168.0.1/24 #Search in Domain
+
+smbmap -H 10.10.10.3
+
+ldapsearch
+https://docs.ldap.com/ldap-sdk/docs/tool-usages/ldapsearch.html
+ldapsearch -H ldap://10.10.10.161 -b "dc=htb,dc=local" -x
+ldapsearch -H ldap://10.10.10.161 -b "dc=htb,dc=local" '(ObjectClass=Person)' --> query for object person like ( users )
+ldapsearch -H ldap://10.10.10.161 -b "dc=htb,dc=local" '(ObjectClass=Person)' sAMAccountName --> query more precisly users accounts
+ldapsearch -H ldap://10.10.10.161 -b "dc=htb,dc=local" '(ObjectClass=Person)' sAMAccountName | grep sAMAccountName --> query more precisly only users accounts
+
+
+enum4linux
+
+crackmapexec --> more updated
+
+rpcclient 
+
+impacket 
+
+Powershell
+$pass = convertto-secrurestring 'password' -AsPlainText - Force

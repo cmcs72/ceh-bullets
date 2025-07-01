@@ -1,0 +1,155 @@
+===[ GOBUSTER ]===
+
+dir Mode --> Uses directory/file enumeration mode
+
+obuster dir -u https://buffered.io -w ~/wordlists/shortlist.txt
+
+===============================================================
+Gobuster v3.2.0
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Mode         : dir
+[+] Url/Domain   : https://buffered.io/
+[+] Threads      : 10
+[+] Wordlist     : /home/oj/wordlists/shortlist.txt
+[+] Status codes : 200,204,301,302,307,401,403
+[+] User Agent   : gobuster/3.2.0
+[+] Timeout      : 10s
+===============================================================
+2019/06/21 11:49:43 Starting gobuster
+===============================================================
+/categories (Status: 301)
+/contact (Status: 301)
+/posts (Status: 301)
+/index (Status: 200)
+===============================================================
+2019/06/21 11:49:44 Finished
+===============================================================
+
+Default options with status codes disabled looks like this:
+
+gobuster dir -u https://buffered.io -w ~/wordlists/shortlist.txt -n
+
+===============================================================
+Gobuster v3.2.0
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Mode         : dir
+[+] Url/Domain   : https://buffered.io/
+[+] Threads      : 10
+[+] Wordlist     : /home/oj/wordlists/shortlist.txt
+[+] Status codes : 200,204,301,302,307,401,403
+[+] User Agent   : gobuster/3.2.0
+[+] No status    : true
+[+] Timeout      : 10s
+===============================================================
+2019/06/21 11:50:18 Starting gobuster
+===============================================================
+/categories
+/contact
+/index
+/posts
+===============================================================
+2019/06/21 11:50:18 Finished
+===============================================================
+
+Verbose output looks like this:
+
+gobuster dir -u https://buffered.io -w ~/wordlists/shortlist.txt -v
+
+===============================================================
+Gobuster v3.2.0
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Mode         : dir
+[+] Url/Domain   : https://buffered.io/
+[+] Threads      : 10
+[+] Wordlist     : /home/oj/wordlists/shortlist.txt
+[+] Status codes : 200,204,301,302,307,401,403
+[+] User Agent   : gobuster/3.2.0
+[+] Verbose      : true
+[+] Timeout      : 10s
+===============================================================
+2019/06/21 11:50:51 Starting gobuster
+===============================================================
+Missed: /alsodoesnotexist (Status: 404)
+Found: /index (Status: 200)
+Missed: /doesnotexist (Status: 404)
+Found: /categories (Status: 301)
+Found: /posts (Status: 301)
+Found: /contact (Status: 301)
+===============================================================
+2019/06/21 11:50:51 Finished
+===============================================================
+
+Example showing content length:
+
+gobuster dir -u https://buffered.io -w ~/wordlists/shortlist.txt -l
+
+===============================================================
+Gobuster v3.2.0
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Mode         : dir
+[+] Url/Domain   : https://buffered.io/
+[+] Threads      : 10
+[+] Wordlist     : /home/oj/wordlists/shortlist.txt
+[+] Status codes : 200,204,301,302,307,401,403
+[+] User Agent   : gobuster/3.2.0
+[+] Show length  : true
+[+] Timeout      : 10s
+===============================================================
+2019/06/21 11:51:16 Starting gobuster
+===============================================================
+/categories (Status: 301) [Size: 178]
+/posts (Status: 301) [Size: 178]
+/contact (Status: 301) [Size: 178]
+/index (Status: 200) [Size: 51759]
+===============================================================
+2019/06/21 11:51:17 Finished
+===============================================================
+
+gobuster dir -u http://10.10.10.12 -w /usr/share/wordlists/dirb/common.txt -t 100 -x .php -q -o ~/Downloads/MrRobot/gobuster_scan.txt
+
+gobuster vhost -u https://mysite.com -w common-vhosts.txt
+
+===============================================================
+Gobuster v3.2.0
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:          https://mysite.com
+[+] Threads:      10
+[+] Wordlist:     common-vhosts.txt
+[+] User Agent:   gobuster/3.2.0
+[+] Timeout:      10s
+===============================================================
+2019/06/21 08:36:00 Starting gobuster
+===============================================================
+Found: www.mysite.com
+Found: piwik.mysite.com
+Found: mail.mysite.com
+===============================================================
+2019/06/21 08:36:05 Finished
+===============================================================
+
+===============================================================
+Gobuster v3.2.0
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Mode         : dns
+[+] Url/Domain   : google.com
+[+] Threads      : 10
+[+] Wordlist     : /home/oj/wordlists/subdomains.txt
+===============================================================
+2019/06/21 11:54:20 Starting gobuster
+===============================================================
+Found: chrome.google.com
+Found: ns1.google.com
+Found: admin.google.com
+Found: www.google.com
+Found: m.google.com
+Found: support.google.com
+===============================================================
+
+gobuster fuzz -u https://example.com?FUZZ=test -w parameter-names.txt
+

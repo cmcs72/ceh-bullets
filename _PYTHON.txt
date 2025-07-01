@@ -1,0 +1,9 @@
+ === [ WEB SERVER ] ===
+ 
+ ## With python 2
+ python2 -m SimpleHTTPServer <default port: 8000>
+ 
+ ## With python 3
+ python3 -m http.server <default port: 8000>
+ 
+ 

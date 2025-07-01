@@ -1,0 +1,48 @@
+===[HASHCAT]===
+
+hashcat --example-hashes   --> show all kind of hashes crackable
+
+
+hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
+
+hashcat -m 18200 hash2.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/InsidePro-PasswordsPro.rule
+
+
+hashcat.exe --force --stdout pwlist.txt -r rules\best64.rule
+	--force		avoid using GPU
+	--stdout	output on screen
+	-r			user rules from
+
+hashcat.exe --force --stdout pwlist.txt -r rules\best64.rule -r rules\toggles1.rule 
+	the same as before but with a concatenation of rules 
+hashcat --force --stdout pwlist.txt -r /usr/share/hashcat/rules/best64.rule -r /usr/share/hashcat/rules/toggles1.rule | sort -u | awk 'length($0) > 8'
+	
+===[PWD DICTIONARY]===
+/usr/share/seclists/Passwords/Common-Credentials/best110.txt
+
+ === [ HASHCAT RULES ] === 
+ 
+A rule-based attack in hashcat involves using a set of rules to modify passwords from a wordlist to generate potential password candidates. These rules can perform various operations such as swapping characters, changing case, appending or prepending characters, and more. For example, you can use the lowercase rule l to convert all letters to lowercase, the uppercase rule u to convert all letters to uppercase, and the capitalize rule c to capitalize the first letter and lowercase the rest.
+
+To create a rule file, you can write these rules into a text file. Each rule should be on a separate line. For instance, a rule file might look like this:
+
+:
+l
+u
+c
+The colon : rule tells hashcat to try the original word from the wordlist as a potential password candidate.
+
+You can also combine multiple functions in a single rule by separating them with spaces. For example, to lowercase a word and then append a digit, you can use the rule l$1.
+
+To perform a rule-based attack using hashcat, you can use the -a 0 option to specify the rule-based attack mode and the -r option to point to your rule file. For example:
+
+hashcat -a 0 -r rules.txt wordlist.txt hashfile.hash
+This command will apply the rules in rules.txt to the passwords in wordlist.txt and attempt to crack the hashes in hashfile.hash.
+
+Additionally, you can use the --debug-mode=1 --debug-file=matched.rule options to save the rules that generated matched passwords.
+
+For more advanced usage, you can explore the full list of available rules and their functions on the hashcat wiki.
+
+References
+https://hashcat.net/wiki/doku.php?id=rule_based_attack
+https://www.armourinfosec.com/performing-rule-based-attack-using-hashcat/

