@@ -1,0 +1,18 @@
+scansione con nmap
+	scansione su porte non convenzionali -p-
+
+scansione con smbclient
+scansione con crackmapexec
+
+linguaggio di progrommazione:
+	python
+	php
+	
+framework di programmazione
+XSS and SSTI
+SQLi nei login e contact form or search form
+
+problema su demon ssh
+whatch for sudo commands
+watch for crontab
+watch process

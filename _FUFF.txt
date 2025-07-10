@@ -1,0 +1,102 @@
+===[ffuf - Fuzz Faster U Fool]===
+
+https://github.com/ffuf/ffuf
+
+ffuf -w /path/to/wordlist -u https://target/FUZZ
+Typical directory discovery -> the term FUZZ will be substituted with the word present in the wordlist
+
+-c -->> colorize
+-mc -->> Match HTTP status codes, or "all" for everything. (default: 200-299,301,302,307,401,403,405,500)
+-fs -->> Filter HTTP response size. Comma separated list of sizes and ranges
+-o or -debug-log -->> write debug log to a file
+
+---[ Brute Force with a Request File ]---
+
+Start Burp
+Make a randomized login to the target web page
+
+POST /login HTTP/1.1
+Host: 10.10.10.10
+Content-Length: 37
+Accept: application/json, text/plain, */*
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36
+Content-Type: application/json
+Origin: http://10.10.10.10
+Referer: http://10.10.10.10/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+
+{"username":"admin","password":"admin"}
+
+Paste the contents into a file, for example request.txt
+
+Replace the fields with placeholder text
+
+POST /login HTTP/1.1
+Host: 10.10.10.10
+Content-Length: 37
+Accept: application/json, text/plain, */*
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36
+Content-Type: application/json
+Origin: http://10.10.10.10
+Referer: http://10.10.10.10/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+
+{"username":"USERFUZZ","password":"PASSFUZZ"}
+Save these contents to a file
+Run FFUF in clusterbomb mode to bruteforce the login
+
+ffuf -request request.txt -request-proto http -mode clusterbomb -w /path/to/users/file.txt:USERFUZZ -w /path/to/password/file.txt:PASSFUZZ -mc 200
+
+[Status: 200, Size: 2, Words: 1, Lines: 1]
+    * USERFUZZ: admin
+    * PASSFUZZ: password
+In this example, we are doing the following:
+
+https://notes.benheater.com/link/495#bkmrk--request-request.txt
+
+-request request.txt is the example request for FFUF to follow
+-request-proto the protocol to use
+-mode clusterbomb use clusterbomb mode with the given inputs
+-w /path/to/users/file.txt:USERFUZZ insert the words from this word list in the "username":"USERFUZZ" placeholder
+-w /path/to/users/file.txt:PASSFUZZ insert the words from this word list in the "password":"PASSFUZZ" placeholder
+-mc 200 sucessful logins will match the HTTP 200 status code
+
+1. Start a Basic Directory Scan
+This command is for finding target's hidden files that are not explicitly listed on the web server. It performs a simple scan with a specialised wordlist.
+ffuf -u http://target.com/FUZZ -w /path/to/wordlist.txt
+
+2. Specify HTTP Method
+This command makes special requests to HTTP methods to be used during the fuzzing process. HTTP methods such as POST, PUT, DELETE are common requests used with this command.
+ffuf -u http://target.com/FUZZ -w /path/to/wordlist.txt -X POST
+
+3. Set Custom Headers
+This command is used to customise HTTP headers to test the application's authentication mechanisms or other applications that require other HTTP headers.
+ffuf -u http://target.com/FUZZ -w /path/to/wordlist.txt -H "Authorization: Bearer token"
+
+4. Display Only Successful Responses
+This command selects only the responses returning 200 HTTP status code and filters the other outputs to be useful for the user.
+ffuf -u http://example.com/FUZZ -w wordlist.txt -mc 200
+
+5. Use Multiple Wordlists
+This command allows the use of multiple special word lists when finding hidden resources. The more word lists used to attack the resource to be brute-forced, the more likely we are to find unknown directories or files.
+ffuf -u http://target.com/FUZZ -w /path/to/wordlist1.txt:/path/to/wordlist2.txt
+
+6. Output Results to a File
+This command writes the output of the fuzzing operation with FFUF to a specified file in ".json" format. This command is very useful if saving the output requires later access.
+ffuf -u http://target.com/FUZZ -w /path/to/wordlist.txt -o output.json
+
+7. Enable Verbose Mode
+This command provides more detailed access to the output displayed according to the requests made. This feature usually contributes to debugging.
+ffuf -u http://target.com/FUZZ -w /path/to/wordlist.txt -v
+
+8. Limit the Number of Concurrent Requests
+This command prevents the server from overloading by limiting the number of simultaneous requests to the server. In addition, FFUF can make it difficult for systems such as IDS/IPS to detect the user performing the fuzzing process and make the brute force attack appear as a natural attempt by the target systems.
+ffuf -u http://target.com/FUZZ -w /path/to/wordlist.txt -p 10
+
+9. Test for Specific Status Codes
+This command filters results as HTTP status code in the output of the Fuzzing process. It allows filtering more than one status code. It is useful for identifying resources with specific access controls or error states.
+ffuf -u http://target.com/FUZZ -w /path/to/wordlist.txt -fc 403,404

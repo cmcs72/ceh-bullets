@@ -1,0 +1,22 @@
+HTTP Status Codes
+HTTP status codes are three-digit numeric codes issued by a server in reply to a client's request made to the server. These codes indicate the status of the request and the outcome of the server's processing of the request.
+ The first digit of the status code defines the class of response, while the last two digits do not have any categorization or classification role.
+ The five classes of HTTP status codes are:
+
+1xx (Informational): Provisional response - the request was received, and the process is continuing.
+2xx (Successful): The server successfully received and accepted the request.
+3xx (Redirection): Further action needs to be taken in order to complete the request.
+4xx (Client Error): The client seems to have made a mistake.
+5xx (Server Error): The server is responsible for an error.
+Some common HTTP status codes include:
+
+200 (OK): The request has succeeded. The server has delivered the requested content.
+201 (Created): The request has been fulfilled, and a new resource has been created.
+202 (Accepted): The request has been accepted for processing, but the processing has not been completed.
+204 (No Content): The server has successfully processed the request, but is not returning any content.
+301 (Moved Permanently): This and all future requests should be directed to the given URI.
+302 Found (Previously "Moved temporarily")
+307 (Temporary Redirect (since HTTP/1.1))
+400 (Bad Request): The server could not understand the request due to malformed syntax.
+404 (Not Found): The server cannot find the requested resource.
+500 (Internal Server Error): The server has encountered a situation it does not know how to handle.
