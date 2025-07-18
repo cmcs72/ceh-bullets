@@ -1,0 +1,129 @@
+===[ SQL - Structured Query Language ]===
+
+SELECT --> query used to retrieve data from db
+
+1.Select * from users;	
+
++--+------------------+
+|id|username|password |
++--+--------+---------+
+|1 |jon		|pass123  |
++--+--------+---------+
+|2 |admin	|p4ssword |
++--+--------+---------+
+|3 |martin	|secret123|
++--+--------+---------+
+
+The first word SELECT, tells the database we want to retrieve some data; 
+the * tells the database we want to receive back all columns from the table. 
+For example, the table may contain three columns (id, username and password). 
+"from users" tells the database we want to retrieve the data from the table named users. 
+Finally, the semicolon (;) at the end tells the database that this is the end of the query.  
+The result will be the entire table itself with all the info contained
+
+select username,password from users; 
++--------+---------+
+|username|password | 
++--------+---------+
+|jon	 |pass123  |
++--------+---------+
+|admin	 |p4ssword |
++--------+---------+
+|martin	 |secret123|
++--------+---------+
+
+This query is similar to the first one except it select specifically two columns of the table : username & password so it will report all but the id
+
+select * from users LIMIT 1; --> returns all the columns by using the * selector, and then the "LIMIT 1" clause forces the database to return only one row of data		
+
++--------+---------+
+|username|password | 
++--------+---------+
+|jon	 |pass123  |
++--------+---------+
+
+Changing the query to "LIMIT 1,1" forces the query to skip the first result, 
+and then "LIMIT 2,1" skips the first two results, and so on. 
+The first number tells the database how many results you wish to skip, 
+and the second number tells the database how many rows to return.
+
+select * from users where username='admin'; -->	This will only return the rows where the username is equal to admin.
++--+------------------+
+|id|username|password |
++--+--------+---------+
+|2 |admin	|p4ssword |
++--+--------+---------+
+
+The * selector is costrained from the clause where which specify the username
+
+select * from users where username != 'admin'; --> This will only return the rows where the username is NOT equal to admin.
++--+------------------+																					---------
+|id|username|password |
++--+--------+---------+
+|1 |jon		|pass123  |
++--+--------+---------+
+|3 |martin	|secret123|
++--+--------+---------+
+
+select * from users where username='admin' or username='jon'; -> This will only return the rows where the username is either equal to admin OR jon. 
++--+------------------+																								                        --
+|id|username|password |
++--+--------+---------+
+|1 |jon		|pass123  |
++--+--------+---------+
+|2 |admin	|p4ssword |
++--+--------+---------+
+
+select * from users where username='admin' and password='p4ssword'; -->	This will only return the rows where the username is equal to admin and the password is equal to p4ssword.
++--+------------------+																								                        --
+|id|username|password |
++--+--------+---------+
+|2 |admin	|p4ssword |
++--+--------+---------+
+
+select * from users where username like 'a%';	-->	This returns any rows with a username BEGINNING with the letter a.
++--+------------------+																	  ---------
+|id|username|password |
++--+--------+---------+
+|2 |admin	|p4ssword |
++--+--------+---------+
+
+select * from users where username like '%n';	-->	This returns any rows with a username ENDING with the letter n.
++--+------------------+																	  ------
+|id|username|password |
++--+--------+---------+
+|1 |jon		|pass123  |
++--+--------+---------+
+|2 |admin	|p4ssword |
++--+--------+---------+
+|3 |martin	|secret123|
++--+--------+---------+
+
+select * from users where username like '%mi%';	-->	This returns any rows with a username CONTAINING the characters mi within them.
++--+------------------+																	  ----------
+|id|username|password |
++--+--------+---------+
+|2 |admin	|p4ssword |
++--+--------+---------+
+
+
+===[ UNION ]===
+
+The UNION statement combines the results of two or more SELECT statements to retrieve data from either single or multiple tables; 
+the rules to this query are that the UNION statement must retrieve the same number of columns in each SELECT statement, 
+the columns have to be of a similar data type, and the column order has to be the same. This might sound not very clear, 
+so let's use the following analogy. Say a company wants to create a list of addresses for all customers and suppliers to post a new catalogue. 
+
+SELECT name,address,city,postcode from customers UNION SELECT company,address,city,postcode from suppliers;
+
+
+
+
+
+
+
+
+
+
+
+

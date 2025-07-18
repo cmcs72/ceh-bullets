@@ -1,0 +1,22 @@
+===[ CURL MIXED EXAMPLE ]
+
+curl -I "http://nocturnal.htb/login.php"	--> riporta solo l' HEADER , utile per vederese ci sono framework di programmazione indicati
+
+curl -X POST \
+-d "user=myuser&pass=mypassword" \
+-c cookies.txt \
+-b cookies.txt \
+-L \
+"http://nocturnal.htb/login.php"
+
+	-----------------
+	-X POST 							--> HTTP Method ( POST, GET ecc )
+	-d "user=myuser&pass=mypassword" 	--> Form Data sent to the server
+	-c cookies.txt 						--> save cookies to file 
+	-b cookies.txt 						--> use cookies saved for other requests/responses			
+	-L 									--> follow redirects	
+	"http://nocturnal.htb/login.php"	--> URL to query
+	-----------------
+	
+	
+

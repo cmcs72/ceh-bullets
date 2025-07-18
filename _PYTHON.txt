@@ -6,4 +6,8 @@
  ## With python 3
  python3 -m http.server <default port: 8000>
  
- 
+ === [ VIRTUAL ] ===
+ from the root/home dir (or a writeble dir (?))
+ python3 -m venv .venv
+ source .venv/bin/activate
+ pip3 install cryptocode

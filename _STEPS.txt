@@ -16,3 +16,7 @@ problema su demon ssh
 whatch for sudo commands
 watch for crontab
 watch process
+
+
+injection of command using char obfuscation
+

@@ -100,3 +100,20 @@ ffuf -u http://target.com/FUZZ -w /path/to/wordlist.txt -p 10
 9. Test for Specific Status Codes
 This command filters results as HTTP status code in the output of the Fuzzing process. It allows filtering more than one status code. It is useful for identifying resources with specific access controls or error states.
 ffuf -u http://target.com/FUZZ -w /path/to/wordlist.txt -fc 403,404
+
+
+===[ ADVANCED ]===
+ffuf -w /usr/share/wordlists/seclists/Usernames/Names/names.txt -u "http://nocturnal.htb/view.php?username=FUZZ&file=.pdf" -b "PHPSESSID=i8slghpvusrgkeq5f2dl454c8c; path=/" -fs +2919
+	-w /usr/share/wordlists/seclists/Usernames/Names/names.txt  --> the list of words to test 
+	-u "http://nocturnal.htb/view.php?username=FUZZ&file=.pdf"  --> the url where to inject
+	-b "PHPSESSID=i8slghpvusrgkeq5f2dl454c8c; path=/" 			-->	the cookie
+	-fs +2919													--> filter out all response if not greater then 2919
+	
+ffuf -w /usr/share/wordlists/seclists/Usernames/Names/names.txt -u "http://nocturnal.htb/view.php?username=FUZZ&file=.pdf" -b "PHPSESSID=i8slghpvusrgkeq5f2dl454c8c; path=/" -fs +2919
+	-w /usr/share/wordlists/seclists/Usernames/Names/names.txt  --> the list of words to test 
+	-u "http://nocturnal.htb/view.php?username=FUZZ&file=.pdf"  --> the url where to inject
+	-b "PHPSESSID=i8slghpvusrgkeq5f2dl454c8c; path=/" 			-->	the cookie
+	-fr "User not found\."										--> filter out all response which contain the phrase. NOTE the escape char only for the dot
+	
+
+	

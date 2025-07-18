@@ -1,4 +1,6 @@
  ====[ USEFUL SITES ]====
+ https://attack.mitre.org/software/
+ 
  ===[ TOOLS ]===
   https://github.com/ShawnDEvans/smbmap
 	SMBMap allows users to enumerate samba share drives across an entire domain. 
@@ -13,13 +15,20 @@ https://lolbas-project.github.io/
 
  ===[ ABUSE LINUX COMMANDS ]===
 
-https://gtfobins.github.io/
+https://gtfobins.github.io/ (https://gtfobins.github.io/#+suid)
 
  ===[ THE BIBLE ]===
 https://book.hacktricks.wiki/en/index.html
 
 ===[ THE BIBLE TOO ]===
 https://ippsec.rocks
+
+===[ OTHERS ]===
+https://computersecuritystudent.com/
+
+
+ === EXPLOITS ===
+http://www.sec-wiki.com/
 
  === PAYLOADS ===
 
@@ -34,6 +43,16 @@ http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 
  === PRIVILEGE ESCALATION ===
 
-https://github.com/peass-ng/PEASS-ng
+https://github.com/peass-ng/PEASS-ng			
+	https://github.com/peass-ng/PEASS-ng/tree/master/winPEAS	==> WINDOWS
+	https://github.com/peass-ng/PEASS-ng/tree/master/linPEAS	==> LINUX
 
 https://github.com/Tib3rius/privilege-escalation-awesome-scripts-suite
+
+https://github.com/PowerShellMafia/PowerSploit
+
+https://github.com/itm4n/PrivescCheck ( Set-ExecutionPolicy Bypass -Scope process -Force)
+
+https://github.com/bitsadmin/wesng
+
+https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md

